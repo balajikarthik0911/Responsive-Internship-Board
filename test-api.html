@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Internship API Test</title>
+</head>
+
+<body>
+
+    <h1>Internship API Test</h1>
+
+    <button onclick="addInternship()">Add Internship</button>
+
+    <button onclick="getInternships()">Get Internships</button>
+
+    <button onclick="updateInternship()">Update Internship</button>
+
+    <button onclick="deleteInternship()">Delete Internship</button>
+
+    <pre id="result"></pre>
+
+    <script>
+
+        async function addInternship() {
+
+            const response = await fetch(
+                "http://localhost:5000/api/internships",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        company: "CodeTech",
+                        role: "Full Stack Developer Intern",
+                        location: "Hyderabad",
+                        duration: "3 Months",
+                        description: "Full Stack Development Internship"
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            document.getElementById("result").textContent =
+                JSON.stringify(data, null, 2);
+        }
+
+
+        async function getInternships() {
+
+            const response = await fetch(
+                "http://localhost:5000/api/internships"
+            );
+
+            const data = await response.json();
+
+            document.getElementById("result").textContent =
+                JSON.stringify(data, null, 2);
+        }
+
+
+        async function updateInternship() {
+
+            const response = await fetch(
+                "http://localhost:5000/api/internships/6",
+                {
+                    method: "PUT",
+
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        company: "CodeTech",
+                        role: "Frontend Developer Intern",
+                        location: "Hyderabad",
+                        duration: "6 Months",
+                        description: "Updated Internship"
+                    })
+                }
+            );
+
+            const data = await response.json();
+
+            document.getElementById("result").textContent =
+                JSON.stringify(data, null, 2);
+        }
+
+
+        async function deleteInternship() {
+
+    const ids = [1, 2, 3, 4, 5];
+
+    for (const id of ids) {
+
+        await fetch(
+            `http://localhost:5000/api/internships/${id}`,
+            {
+                method: "DELETE"
+            }
+        );
+    }
+
+    document.getElementById("result").textContent =
+        "Test records deleted successfully.";
+}
+
+    </script>
+
+</body>
+</html>
