@@ -1,30 +1,255 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Internship API Test</title>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            background: #f5f5f5;
+        }
+
+        h1 {
+            color: #222;
+        }
+
+        button {
+            padding: 10px 18px;
+            margin: 5px;
+            border: none;
+            background: #0066ff;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #004ecc;
+        }
+
+        input {
+            padding: 10px;
+            margin: 5px;
+            width: 250px;
+        }
+
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background: white;
+            border: 1px solid #ddd;
+            white-space: pre-wrap;
+            min-height: 100px;
+        }
+
+        .form {
+            background: white;
+            padding: 20px;
+            margin-top: 20px;
+            border-radius: 8px;
+        }
+    </style>
 </head>
 
 <body>
 
     <h1>Internship API Test</h1>
 
-    <button onclick="addInternship()">Add Internship</button>
+    <div class="form">
 
-    <button onclick="getInternships()">Get Internships</button>
+        <h2>Add Internship</h2>
 
-    <button onclick="updateInternship()">Update Internship</button>
+        <input
+            type="text"
+            id="title"
+            placeholder="Internship Title"
+        >
 
-    <button onclick="deleteInternship()">Delete Internship</button>
+        <input
+            type="text"
+            id="company"
+            placeholder="Company"
+        >
 
-    <pre id="result"></pre>
+        <input
+            type="text"
+            id="location"
+            placeholder="Location"
+        >
+
+        <input
+            type="text"
+            id="duration"
+            placeholder="Duration"
+        >
+
+        <input
+            type="text"
+            id="description"
+            placeholder="Description"
+        >
+
+        <br>
+
+        <button onclick="addInternship()">
+            Add Internship
+        </button>
+
+    </div>
+
+
+    <div class="form">
+
+        <h2>Get Internships</h2>
+
+        <button onclick="getInternships()">
+            Get Internships
+        </button>
+
+    </div>
+
+
+    <div class="form">
+
+        <h2>Update Internship</h2>
+
+        <input
+            type="number"
+            id="updateId"
+            placeholder="Internship ID"
+        >
+
+        <input
+            type="text"
+            id="updateTitle"
+            placeholder="New Title"
+        >
+
+        <input
+            type="text"
+            id="updateCompany"
+            placeholder="New Company"
+        >
+
+        <input
+            type="text"
+            id="updateLocation"
+            placeholder="New Location"
+        >
+
+        <input
+            type="text"
+            id="updateDuration"
+            placeholder="New Duration"
+        >
+
+        <input
+            type="text"
+            id="updateDescription"
+            placeholder="New Description"
+        >
+
+        <br>
+
+        <button onclick="updateInternship()">
+            Update Internship
+        </button>
+
+    </div>
+
+
+    <div class="form">
+
+        <h2>Delete Internship</h2>
+
+        <input
+            type="number"
+            id="deleteId"
+            placeholder="Internship ID"
+        >
+
+        <button onclick="deleteInternship()">
+            Delete Internship
+        </button>
+
+    </div>
+
+
+    <h2>Result</h2>
+
+    <div id="result">
+        Click a button to test the API.
+    </div>
+
 
     <script>
 
+        const API_URL = "http://localhost:5000/api/internships";
+
+
+        // =========================
+        // GET ALL INTERNSHIPS
+        // =========================
+
+        async function getInternships() {
+
+            try {
+
+                const response = await fetch(API_URL);
+
+                const data = await response.json();
+
+                document.getElementById("result").textContent =
+                    JSON.stringify(data, null, 2);
+
+            } catch (error) {
+
+                document.getElementById("result").textContent =
+                    "Error: " + error.message;
+
+            }
+        }
+
+
+        // =========================
+        // ADD INTERNSHIP
+        // =========================
+
         async function addInternship() {
 
-            const response = await fetch(
-                "http://localhost:5000/api/internships",
-                {
+            const title =
+                document.getElementById("title").value.trim();
+
+            const company =
+                document.getElementById("company").value.trim();
+
+            const location =
+                document.getElementById("location").value.trim();
+
+            const duration =
+                document.getElementById("duration").value.trim();
+
+            const description =
+                document.getElementById("description").value.trim();
+
+
+            if (!title || !company) {
+
+                document.getElementById("result").textContent =
+                    "Title and company are required.";
+
+                return;
+            }
+
+
+            try {
+
+                const response = await fetch(API_URL, {
+
                     method: "POST",
 
                     headers: {
@@ -32,80 +257,163 @@
                     },
 
                     body: JSON.stringify({
-                        company: "CodeTech",
-                        role: "Full Stack Developer Intern",
-                        location: "Hyderabad",
-                        duration: "3 Months",
-                        description: "Full Stack Development Internship"
+
+                        title: title,
+                        company: company,
+                        location: location,
+                        duration: duration,
+                        description: description
+
                     })
+
+                });
+
+
+                const data = await response.json();
+
+
+                document.getElementById("result").textContent =
+                    JSON.stringify(data, null, 2);
+
+
+                if (response.ok) {
+
+                    document.getElementById("title").value = "";
+                    document.getElementById("company").value = "";
+                    document.getElementById("location").value = "";
+                    document.getElementById("duration").value = "";
+                    document.getElementById("description").value = "";
+
                 }
-            );
 
-            const data = await response.json();
+            } catch (error) {
 
-            document.getElementById("result").textContent =
-                JSON.stringify(data, null, 2);
+                document.getElementById("result").textContent =
+                    "Error: " + error.message;
+
+            }
         }
 
 
-        async function getInternships() {
-
-            const response = await fetch(
-                "http://localhost:5000/api/internships"
-            );
-
-            const data = await response.json();
-
-            document.getElementById("result").textContent =
-                JSON.stringify(data, null, 2);
-        }
-
+        // =========================
+        // UPDATE INTERNSHIP
+        // =========================
 
         async function updateInternship() {
 
-            const response = await fetch(
-                "http://localhost:5000/api/internships/6",
-                {
-                    method: "PUT",
+            const id =
+                document.getElementById("updateId").value;
 
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+            const title =
+                document.getElementById("updateTitle").value.trim();
 
-                    body: JSON.stringify({
-                        company: "CodeTech",
-                        role: "Frontend Developer Intern",
-                        location: "Hyderabad",
-                        duration: "6 Months",
-                        description: "Updated Internship"
-                    })
-                }
-            );
+            const company =
+                document.getElementById("updateCompany").value.trim();
 
-            const data = await response.json();
+            const location =
+                document.getElementById("updateLocation").value.trim();
 
-            document.getElementById("result").textContent =
-                JSON.stringify(data, null, 2);
+            const duration =
+                document.getElementById("updateDuration").value.trim();
+
+            const description =
+                document.getElementById("updateDescription").value.trim();
+
+
+            if (!id) {
+
+                document.getElementById("result").textContent =
+                    "Please enter Internship ID.";
+
+                return;
+            }
+
+
+            try {
+
+                const response = await fetch(
+                    `${API_URL}/${id}`,
+                    {
+
+                        method: "PUT",
+
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+
+                        body: JSON.stringify({
+
+                            title: title,
+                            company: company,
+                            location: location,
+                            duration: duration,
+                            description: description
+
+                        })
+
+                    }
+                );
+
+
+                const data = await response.json();
+
+
+                document.getElementById("result").textContent =
+                    JSON.stringify(data, null, 2);
+
+            } catch (error) {
+
+                document.getElementById("result").textContent =
+                    "Error: " + error.message;
+
+            }
         }
 
 
+        // =========================
+        // DELETE INTERNSHIP
+        // =========================
+
         async function deleteInternship() {
 
-    const ids = [1, 2, 3, 4, 5];
+            const id =
+                document.getElementById("deleteId").value;
 
-    for (const id of ids) {
 
-        await fetch(
-            `http://localhost:5000/api/internships/${id}`,
-            {
-                method: "DELETE"
+            if (!id) {
+
+                document.getElementById("result").textContent =
+                    "Please enter Internship ID.";
+
+                return;
             }
-        );
-    }
 
-    document.getElementById("result").textContent =
-        "Test records deleted successfully.";
-}
+
+            try {
+
+                const response = await fetch(
+                    `${API_URL}/${id}`,
+                    {
+
+                        method: "DELETE"
+
+                    }
+                );
+
+
+                const data = await response.json();
+
+
+                document.getElementById("result").textContent =
+                    JSON.stringify(data, null, 2);
+
+            } catch (error) {
+
+                document.getElementById("result").textContent =
+                    "Error: " + error.message;
+
+            }
+        }
 
     </script>
 
