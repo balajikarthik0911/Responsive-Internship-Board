@@ -1,137 +1,204 @@
 const express = require("express");
 const cors = require("cors");
 const sqlite3 = require("sqlite3").verbose();
+const path = require("path");
 
 const app = express();
 const PORT = 5000;
 
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-const db = new sqlite3.Database("./internships.db", (err) => {
+// Serve frontend files
+app.use(express.static(path.join(__dirname, "..")));
+
+// SQLite database
+const dbPath = path.join(__dirname, "internships.db");
+
+const db = new sqlite3.Database(dbPath, (err) => {
     if (err) {
-        console.error("Database error:", err.message);
+        console.error("Database connection error:", err.message);
     } else {
         console.log("Connected to SQLite database.");
     }
 });
 
-db.run(`
+// Create table
+db.run(
+    `
     CREATE TABLE IF NOT EXISTS internships (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
+        title TEXT NOT NULL,
         company TEXT NOT NULL,
-        role TEXT NOT NULL,
-        location TEXT,
-        duration TEXT,
-        description TEXT,
+        location TEXT NOT NULL,
+        duration TEXT NOT NULL,
+        description TEXT NOT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )
-`);
+    `,
+    (err) => {
+        if (err) {
+            console.error("Table creation error:", err.message);
+        } else {
+            console.log("Internships table ready.");
+        }
+    }
+);
 
+// --------------------------------------------------
 // GET all internships
+// --------------------------------------------------
 app.get("/api/internships", (req, res) => {
-    db.all(
-        "SELECT * FROM internships ORDER BY id DESC",
-        [],
-        (err, rows) => {
-            if (err) {
-                return res.status(500).json({
-                    error: err.message
-                });
-            }
+    const sql = `
+        SELECT
+            id,
+            title,
+            company,
+            location,
+            duration,
+            description,
+            created_at
+        FROM internships
+        ORDER BY id DESC
+    `;
 
-            res.json(rows);
+    db.all(sql, [], (err, rows) => {
+        if (err) {
+            console.error("GET error:", err.message);
+            return res.status(500).json({
+                error: err.message
+            });
         }
-    );
+
+        res.json(rows);
+    });
 });
 
-// GET one internship
+// --------------------------------------------------
+// GET internship by ID
+// --------------------------------------------------
 app.get("/api/internships/:id", (req, res) => {
-    db.get(
-        "SELECT * FROM internships WHERE id = ?",
-        [req.params.id],
-        (err, row) => {
-            if (err) {
-                return res.status(500).json({
-                    error: err.message
-                });
-            }
+    const id = Number(req.params.id);
 
-            if (!row) {
-                return res.status(404).json({
-                    message: "Internship not found"
-                });
-            }
+    if (!Number.isInteger(id)) {
+        return res.status(400).json({
+            error: "Invalid internship ID"
+        });
+    }
 
-            res.json(row);
+    const sql = `
+        SELECT
+            id,
+            title,
+            company,
+            location,
+            duration,
+            description,
+            created_at
+        FROM internships
+        WHERE id = ?
+    `;
+
+    db.get(sql, [id], (err, row) => {
+        if (err) {
+            console.error("GET BY ID error:", err.message);
+            return res.status(500).json({
+                error: err.message
+            });
         }
-    );
+
+        if (!row) {
+            return res.status(404).json({
+                error: "Internship not found"
+            });
+        }
+
+        res.json(row);
+    });
 });
 
-// CREATE internship
+// --------------------------------------------------
+// POST - Add internship
+// --------------------------------------------------
 app.post("/api/internships", (req, res) => {
     const {
+        title,
         company,
-        role,
         location,
         duration,
         description
     } = req.body;
 
-    if (!company || !role) {
+    if (!title || !company || !location || !duration || !description) {
         return res.status(400).json({
-            message: "Company and role are required"
+            error: "All fields are required"
         });
     }
 
     const sql = `
         INSERT INTO internships
-        (company, role, location, duration, description)
+        (title, company, location, duration, description)
         VALUES (?, ?, ?, ?, ?)
     `;
 
     db.run(
         sql,
         [
-            company,
-            role,
-            location,
-            duration,
-            description
+            title.trim(),
+            company.trim(),
+            location.trim(),
+            duration.trim(),
+            description.trim()
         ],
         function (err) {
             if (err) {
+                console.error("POST error:", err.message);
+
                 return res.status(500).json({
                     error: err.message
                 });
             }
 
             res.status(201).json({
-                id: this.lastID,
-                company,
-                role,
-                location,
-                duration,
-                description
+                message: "Internship added successfully",
+                id: this.lastID
             });
         }
     );
 });
 
-// UPDATE internship
+// --------------------------------------------------
+// PUT - Update internship
+// --------------------------------------------------
 app.put("/api/internships/:id", (req, res) => {
+    const id = Number(req.params.id);
+
+    if (!Number.isInteger(id)) {
+        return res.status(400).json({
+            error: "Invalid internship ID"
+        });
+    }
+
     const {
+        title,
         company,
-        role,
         location,
         duration,
         description
     } = req.body;
 
+    if (!title || !company || !location || !duration || !description) {
+        return res.status(400).json({
+            error: "All fields are required"
+        });
+    }
+
     const sql = `
         UPDATE internships
-        SET company = ?,
-            role = ?,
+        SET
+            title = ?,
+            company = ?,
             location = ?,
             duration = ?,
             description = ?
@@ -141,15 +208,17 @@ app.put("/api/internships/:id", (req, res) => {
     db.run(
         sql,
         [
-            company,
-            role,
-            location,
-            duration,
-            description,
-            req.params.id
+            title.trim(),
+            company.trim(),
+            location.trim(),
+            duration.trim(),
+            description.trim(),
+            id
         ],
         function (err) {
             if (err) {
+                console.error("PUT error:", err.message);
+
                 return res.status(500).json({
                     error: err.message
                 });
@@ -157,7 +226,7 @@ app.put("/api/internships/:id", (req, res) => {
 
             if (this.changes === 0) {
                 return res.status(404).json({
-                    message: "Internship not found"
+                    error: "Internship not found"
                 });
             }
 
@@ -168,31 +237,47 @@ app.put("/api/internships/:id", (req, res) => {
     );
 });
 
-// DELETE internship
+// --------------------------------------------------
+// DELETE - Delete internship
+// --------------------------------------------------
 app.delete("/api/internships/:id", (req, res) => {
-    db.run(
-        "DELETE FROM internships WHERE id = ?",
-        [req.params.id],
-        function (err) {
-            if (err) {
-                return res.status(500).json({
-                    error: err.message
-                });
-            }
+    const id = Number(req.params.id);
 
-            if (this.changes === 0) {
-                return res.status(404).json({
-                    message: "Internship not found"
-                });
-            }
+    if (!Number.isInteger(id)) {
+        return res.status(400).json({
+            error: "Invalid internship ID"
+        });
+    }
 
-            res.json({
-                message: "Internship deleted successfully"
+    const sql = `
+        DELETE FROM internships
+        WHERE id = ?
+    `;
+
+    db.run(sql, [id], function (err) {
+        if (err) {
+            console.error("DELETE error:", err.message);
+
+            return res.status(500).json({
+                error: err.message
             });
         }
-    );
+
+        if (this.changes === 0) {
+            return res.status(404).json({
+                error: "Internship not found"
+            });
+        }
+
+        res.json({
+            message: "Internship deleted successfully"
+        });
+    });
 });
 
+// --------------------------------------------------
+// Start server
+// --------------------------------------------------
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
 });
