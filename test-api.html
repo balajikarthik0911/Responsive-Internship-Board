@@ -1,421 +1,132 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Internship API Test</title>
 
-    <title>Internship API Test</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 40px;
+      background: #f5f5f5;
+    }
 
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background: #f5f5f5;
-        }
+    h1 {
+      color: #222;
+    }
 
-        h1 {
-            color: #222;
-        }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 12px 22px;
+      margin: 10px 10px 10px 0;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+    }
 
-        button {
-            padding: 10px 18px;
-            margin: 5px;
-            border: none;
-            background: #0066ff;
-            color: white;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+    button:hover {
+      background: #0056b3;
+    }
 
-        button:hover {
-            background: #004ecc;
-        }
-
-        input {
-            padding: 10px;
-            margin: 5px;
-            width: 250px;
-        }
-
-        #result {
-            margin-top: 20px;
-            padding: 20px;
-            background: white;
-            border: 1px solid #ddd;
-            white-space: pre-wrap;
-            min-height: 100px;
-        }
-
-        .form {
-            background: white;
-            padding: 20px;
-            margin-top: 20px;
-            border-radius: 8px;
-        }
-    </style>
+    #result {
+      margin-top: 25px;
+      padding: 25px;
+      background: #111;
+      color: #00ff00;
+      min-height: 200px;
+      border-radius: 8px;
+      font-family: Consolas, monospace;
+      white-space: pre-wrap;
+    }
+  </style>
 </head>
 
 <body>
 
-    <h1>Internship API Test</h1>
+  <h1>Internship API Test</h1>
 
-    <div class="form">
+  <button onclick="getInternships()">
+    Get Internships
+  </button>
 
-        <h2>Add Internship</h2>
+  <button onclick="getApplications()">
+    Get Applications
+  </button>
 
-        <input
-            type="text"
-            id="title"
-            placeholder="Internship Title"
-        >
-
-        <input
-            type="text"
-            id="company"
-            placeholder="Company"
-        >
-
-        <input
-            type="text"
-            id="location"
-            placeholder="Location"
-        >
-
-        <input
-            type="text"
-            id="duration"
-            placeholder="Duration"
-        >
-
-        <input
-            type="text"
-            id="description"
-            placeholder="Description"
-        >
-
-        <br>
-
-        <button onclick="addInternship()">
-            Add Internship
-        </button>
-
-    </div>
+  <div id="result">Click a button to test the API.</div>
 
 
-    <div class="form">
+  <script>
 
-        <h2>Get Internships</h2>
+    // GET INTERNSHIPS
+    async function getInternships() {
 
-        <button onclick="getInternships()">
-            Get Internships
-        </button>
+      const result = document.getElementById("result");
 
-    </div>
+      result.textContent = "Loading internships...";
 
+      try {
 
-    <div class="form">
+        const response = await fetch("/api/internships");
 
-        <h2>Update Internship</h2>
-
-        <input
-            type="number"
-            id="updateId"
-            placeholder="Internship ID"
-        >
-
-        <input
-            type="text"
-            id="updateTitle"
-            placeholder="New Title"
-        >
-
-        <input
-            type="text"
-            id="updateCompany"
-            placeholder="New Company"
-        >
-
-        <input
-            type="text"
-            id="updateLocation"
-            placeholder="New Location"
-        >
-
-        <input
-            type="text"
-            id="updateDuration"
-            placeholder="New Duration"
-        >
-
-        <input
-            type="text"
-            id="updateDescription"
-            placeholder="New Description"
-        >
-
-        <br>
-
-        <button onclick="updateInternship()">
-            Update Internship
-        </button>
-
-    </div>
-
-
-    <div class="form">
-
-        <h2>Delete Internship</h2>
-
-        <input
-            type="number"
-            id="deleteId"
-            placeholder="Internship ID"
-        >
-
-        <button onclick="deleteInternship()">
-            Delete Internship
-        </button>
-
-    </div>
-
-
-    <h2>Result</h2>
-
-    <div id="result">
-        Click a button to test the API.
-    </div>
-
-
-    <script>
-
-        const API_URL = "http://localhost:5000/api/internships";
-
-
-        // =========================
-        // GET ALL INTERNSHIPS
-        // =========================
-
-        async function getInternships() {
-
-            try {
-
-                const response = await fetch(API_URL);
-
-                const data = await response.json();
-
-                document.getElementById("result").textContent =
-                    JSON.stringify(data, null, 2);
-
-            } catch (error) {
-
-                document.getElementById("result").textContent =
-                    "Error: " + error.message;
-
-            }
+        if (!response.ok) {
+          throw new Error(
+            "HTTP Error: " + response.status
+          );
         }
 
+        const data = await response.json();
 
-        // =========================
-        // ADD INTERNSHIP
-        // =========================
+        result.textContent =
+          "SUCCESS\n\n" +
+          JSON.stringify(data, null, 2);
 
-        async function addInternship() {
+      } catch (error) {
 
-            const title =
-                document.getElementById("title").value.trim();
+        result.textContent =
+          "ERROR\n\n" +
+          error.message;
 
-            const company =
-                document.getElementById("company").value.trim();
-
-            const location =
-                document.getElementById("location").value.trim();
-
-            const duration =
-                document.getElementById("duration").value.trim();
-
-            const description =
-                document.getElementById("description").value.trim();
+      }
+    }
 
 
-            if (!title || !company) {
+    // GET APPLICATIONS
+    async function getApplications() {
 
-                document.getElementById("result").textContent =
-                    "Title and company are required.";
+      const result = document.getElementById("result");
 
-                return;
-            }
+      result.textContent = "Loading applications...";
 
+      try {
 
-            try {
+        const response = await fetch("/api/applications");
 
-                const response = await fetch(API_URL, {
-
-                    method: "POST",
-
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-
-                    body: JSON.stringify({
-
-                        title: title,
-                        company: company,
-                        location: location,
-                        duration: duration,
-                        description: description
-
-                    })
-
-                });
-
-
-                const data = await response.json();
-
-
-                document.getElementById("result").textContent =
-                    JSON.stringify(data, null, 2);
-
-
-                if (response.ok) {
-
-                    document.getElementById("title").value = "";
-                    document.getElementById("company").value = "";
-                    document.getElementById("location").value = "";
-                    document.getElementById("duration").value = "";
-                    document.getElementById("description").value = "";
-
-                }
-
-            } catch (error) {
-
-                document.getElementById("result").textContent =
-                    "Error: " + error.message;
-
-            }
+        if (!response.ok) {
+          throw new Error(
+            "HTTP Error: " + response.status
+          );
         }
 
+        const data = await response.json();
 
-        // =========================
-        // UPDATE INTERNSHIP
-        // =========================
+        result.textContent =
+          "SUCCESS\n\n" +
+          JSON.stringify(data, null, 2);
 
-        async function updateInternship() {
+      } catch (error) {
 
-            const id =
-                document.getElementById("updateId").value;
+        result.textContent =
+          "ERROR\n\n" +
+          error.message;
 
-            const title =
-                document.getElementById("updateTitle").value.trim();
+      }
+    }
 
-            const company =
-                document.getElementById("updateCompany").value.trim();
-
-            const location =
-                document.getElementById("updateLocation").value.trim();
-
-            const duration =
-                document.getElementById("updateDuration").value.trim();
-
-            const description =
-                document.getElementById("updateDescription").value.trim();
-
-
-            if (!id) {
-
-                document.getElementById("result").textContent =
-                    "Please enter Internship ID.";
-
-                return;
-            }
-
-
-            try {
-
-                const response = await fetch(
-                    `${API_URL}/${id}`,
-                    {
-
-                        method: "PUT",
-
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-
-                        body: JSON.stringify({
-
-                            title: title,
-                            company: company,
-                            location: location,
-                            duration: duration,
-                            description: description
-
-                        })
-
-                    }
-                );
-
-
-                const data = await response.json();
-
-
-                document.getElementById("result").textContent =
-                    JSON.stringify(data, null, 2);
-
-            } catch (error) {
-
-                document.getElementById("result").textContent =
-                    "Error: " + error.message;
-
-            }
-        }
-
-
-        // =========================
-        // DELETE INTERNSHIP
-        // =========================
-
-        async function deleteInternship() {
-
-            const id =
-                document.getElementById("deleteId").value;
-
-
-            if (!id) {
-
-                document.getElementById("result").textContent =
-                    "Please enter Internship ID.";
-
-                return;
-            }
-
-
-            try {
-
-                const response = await fetch(
-                    `${API_URL}/${id}`,
-                    {
-
-                        method: "DELETE"
-
-                    }
-                );
-
-
-                const data = await response.json();
-
-
-                document.getElementById("result").textContent =
-                    JSON.stringify(data, null, 2);
-
-            } catch (error) {
-
-                document.getElementById("result").textContent =
-                    "Error: " + error.message;
-
-            }
-        }
-
-    </script>
+  </script>
 
 </body>
 </html>

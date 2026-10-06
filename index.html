@@ -20,33 +20,53 @@
         placeholder="Search internships..."
     >
 
-    <section id="internshipList">
+ <section id="applicationSection">
 
-        <div class="internship">
-            <h2>Web Development Intern</h2>
-            <p>Company: Tech Solutions</p>
-            <p>Location: Hyderabad</p>
-            <p>Duration: 3 Months</p>
-            <button>Apply Now</button>
-        </div>
+    <h2>Apply for an Internship</h2>
 
-        <div class="internship">
-            <h2>Frontend Development Intern</h2>
-            <p>Company: Digital Labs</p>
-            <p>Location: Remote</p>
-            <p>Duration: 6 Months</p>
-            <button>Apply Now</button>
-        </div>
+    <form id="applicationForm">
 
-        <div class="internship">
-            <h2>Python Developer Intern</h2>
-            <p>Company: CodeTech</p>
-            <p>Location: Hyderabad</p>
-            <p>Duration: 3 Months</p>
-            <button>Apply Now</button>
-        </div>
+        <label for="applicantName">Name</label>
+        <input
+            type="text"
+            id="applicantName"
+            required
+            minlength="2"
+            maxlength="50"
+        >
 
-    </section>
+        <label for="applicantEmail">Email</label>
+        <input
+            type="email"
+            id="applicantEmail"
+            required
+        >
+
+        <label for="applicantPhone">Phone</label>
+        <input
+            type="tel"
+            id="applicantPhone"
+            required
+            pattern="[0-9]{10}"
+        >
+
+        <label for="internshipId">Internship ID</label>
+        <input
+            type="number"
+            id="internshipId"
+            required
+            min="1"
+        >
+
+        <button type="submit">
+            Submit Application
+        </button>
+
+        <p id="applicationMessage"></p>
+
+    </form>
+
+</section>
 
 </main>
 
