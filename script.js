@@ -42,7 +42,7 @@ function displayInternships(internships) {
         card.className = "internship";
 
         card.innerHTML = `
-            <h3>${internship.role}</h3>
+            <h3>${internship.title}</h3>
 
             <p>Company: ${internship.company}</p>
 
