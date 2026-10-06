@@ -36,7 +36,7 @@ Responsive-Internship-Board/
 │   ├── server.js
 │   ├── package.json
 │   ├── package-lock.json
-│   └── internships.db
+│
 │
 ├── index.html
 ├── script.js
