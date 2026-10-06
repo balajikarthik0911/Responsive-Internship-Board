@@ -1,8 +1,10 @@
-const API_URL = "http://localhost:5000/api/internships";
+const API_URL = "/api/internships";
 
 const search = document.getElementById("search");
+const container = document.getElementById("internshipList");
 
-// Load internships from REST API
+let allInternships = [];
+
 async function loadInternships() {
     try {
         const response = await fetch(API_URL);
@@ -11,29 +13,36 @@ async function loadInternships() {
             throw new Error("Failed to load internships");
         }
 
-        const internships = await response.json();
+        allInternships = await response.json();
 
-        displayInternships(internships);
+        displayInternships(allInternships);
 
     } catch (error) {
         console.error("API Error:", error);
+
+        if (container) {
+            container.innerHTML = `
+                <p>Unable to load internships. Please try again.</p>
+            `;
+        }
     }
 }
 
-
-// Display internships on the website
 function displayInternships(internships) {
 
-    const existingInternship = document.querySelector(".internship");
-
-    if (!existingInternship) {
+    if (!container) {
         console.error("Internship container not found.");
         return;
     }
 
-    const container = existingInternship.parentElement;
-
     container.innerHTML = "";
+
+    if (internships.length === 0) {
+        container.innerHTML = `
+            <p>No internships found.</p>
+        `;
+        return;
+    }
 
     internships.forEach(function (internship) {
 
@@ -43,50 +52,98 @@ function displayInternships(internships) {
 
         card.innerHTML = `
             <h3>${internship.title}</h3>
-
             <p>Company: ${internship.company}</p>
-
             <p>Location: ${internship.location || "Not specified"}</p>
-
             <p>Duration: ${internship.duration || "Not specified"}</p>
-
             <p>${internship.description || ""}</p>
-
-            <button>Apply Now</button>
+            <button onclick="selectInternship(${internship.id})">
+                Apply Now
+            </button>
         `;
 
         container.appendChild(card);
     });
 }
 
-
-// Search internships
 if (search) {
 
     search.addEventListener("input", function () {
 
-        const searchText = search.value.toLowerCase();
+        const searchText = search.value.toLowerCase().trim();
 
-        const internships =
-            document.querySelectorAll(".internship");
+        const filtered = allInternships.filter(function (internship) {
 
-        internships.forEach(function (internship) {
+            const text = `
+                ${internship.title}
+                ${internship.company}
+                ${internship.location}
+                ${internship.duration}
+                ${internship.description}
+            `.toLowerCase();
 
-            const text =
-                internship.textContent.toLowerCase();
-
-            if (text.includes(searchText)) {
-
-                internship.style.display = "block";
-
-            } else {
-
-                internship.style.display = "none";
-            }
+            return text.includes(searchText);
         });
+
+        displayInternships(filtered);
     });
 }
 
+function selectInternship(id) {
+    const internshipId = document.getElementById("internshipId");
 
-// Load data when page opens
+    if (internshipId) {
+        internshipId.value = id;
+
+        document.getElementById("applicationSection")
+            .scrollIntoView({ behavior: "smooth" });
+    }
+}
+
 loadInternships();
+
+// Submit internship application
+const applicationForm = document.getElementById("applicationForm");
+const applicationMessage = document.getElementById("applicationMessage");
+
+if (applicationForm) {
+    applicationForm.addEventListener("submit", async function (event) {
+        event.preventDefault();
+
+        const name = document.getElementById("applicantName").value.trim();
+        const email = document.getElementById("applicantEmail").value.trim();
+        const phone = document.getElementById("applicantPhone").value.trim();
+        const internshipId = document.getElementById("internshipId").value;
+
+        try {
+            const response = await fetch("/api/applications", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    name,
+                    email,
+                    phone,
+                    internshipId
+                })
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Failed to submit application");
+            }
+
+            applicationMessage.textContent = data.message;
+            applicationMessage.style.color = "green";
+
+            applicationForm.reset();
+
+        } catch (error) {
+            console.error("Application error:", error);
+
+            applicationMessage.textContent = error.message;
+            applicationMessage.style.color = "red";
+        }
+    });
+}

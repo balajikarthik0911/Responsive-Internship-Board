@@ -1,30 +1,40 @@
 # Responsive Internship Board
 
-A responsive internship listing web application built using HTML, CSS, JavaScript, Node.js, Express.js, and SQLite.
+A responsive full-stack internship board where users can browse internships, search for opportunities, and submit internship applications.
 
 ## 🚀 Features
 
-- Responsive internship board
+- Responsive internship board UI
 - Search internships
-- Display internship details
-- Add new internships
-- Get all internships
-- Update internship details
-- Delete internships
-- REST API using Express.js
-- SQLite database integration
-- API testing page
-- Clean and simple user interface
+- Internship details
+- Apply Now functionality
+- Application form
+- REST API
+- SQLite database
+- Persistent application data
+- Health check endpoint
+- API data retrieval
+- Input validation
+- Rate limiting
+- Production-ready project structure
 
 ## 🛠️ Technologies Used
 
+### Frontend
 - HTML5
 - CSS3
 - JavaScript
+
+### Backend
 - Node.js
 - Express.js
+
+### Database
 - SQLite
+
+### Other
 - REST API
+- Express Rate Limit
 - Git & GitHub
 
 ## 📁 Project Structure
@@ -32,16 +42,15 @@ A responsive internship listing web application built using HTML, CSS, JavaScrip
 ```text
 Responsive-Internship-Board/
 │
-├── backend/
-│   ├── server.js
-│   ├── package.json
-│   ├── package-lock.json
-│
-│
 ├── index.html
-├── script.js
 ├── style.css
-├── test-api.html
+├── script.js
 ├── README.md
 ├── LICENSE
-└── .gitignore
+├── .gitignore
+│
+└── backend/
+    ├── server.js
+    ├── package.json
+    ├── package-lock.json
+    └── database.sqlite
